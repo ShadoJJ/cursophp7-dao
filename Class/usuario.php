@@ -2,6 +2,8 @@
 
 class Usuario {
 
+
+
     private $idusuario;
     private $deslogin;
     private $dessenha;
@@ -74,23 +76,76 @@ class Usuario {
             $this->setDessenha($row['dessenha']);
             $this->setDtcadastro(new DateTime($row['dtcadastro']));
 
-        }
+            //var_dump($results);
+
+        } 
 
     }
 
-    public function __toString(){
+    public static function getList(){
 
-        return json_encode(array(
+        $sql = new Sql();
 
-            "idusuario"=>$this->getIdusuario(),
-            "deslogin"=>$this->getDeslogin(),
-            "dessenha"=>$this->getDessenha(),
-            "dtcadastro"=>$this->getDtcadastro()->format("d/m/Y H:i:s")
+        return $sql->select("SELECT * FROM tb_usuarios ORDER BY deslogin;");
 
+    }
+
+    public static function search($login){
+
+        $sql = new Sql();
+
+        return $sql->select("SELECT * FROM tb_usuarios WHERE deslogin LIKE :SEARCH ORDER BY deslogin;", array(
+            ':SEARCH'=>"%".$login."%"
         ));
 
     }
 
+    public function login($login, $pass){
+
+         $sql = new Sql();
+
+        $results = $sql->select("SELECT * FROM tb_usuarios WHERE deslogin = :LOGIN AND dessenha = :PASS", array(
+
+            ":LOGIN"=>$login,
+            ":PASS"=>$pass
+
+        ));
+
+        if (count($results) > 0) {
+
+            $row = $results[0];
+
+            $this->setIdusuario($row['idusuario']);
+            $this->setDeslogin($row['deslogin']);
+            $this->setDessenha($row['dessenha']);
+            $this->setDtcadastro(new DateTime($row['dtcadastro']));
+
+    } Else {
+
+        throw new Exception ("Login e/ou Senha Inválidos");
+
+    }
 }
+
+
+    public function __toString ():string{
+
+        $teste = array(
+
+            'idusuario' =>$this->getIdusuario(),
+            'deslogin' =>$this->getDeslogin(),
+            'dessenha' =>$this->getDessenha(),
+            'dtcadastro' =>$this->getDtcadastro()->format("d/m/Y H:i:s")
+
+        );
+
+        return json_encode($teste);
+
+    }
+
+}
+
+  
+
 
 ?>
